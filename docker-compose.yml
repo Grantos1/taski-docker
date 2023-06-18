@@ -1,36 +1,25 @@
-#Файл docker-compose.yml
 
-# Версия docker-compose
 version: '3'
 
-# Перечень volume
 volumes:
   pg_data:
   static:
 
-# Перечень контейнеров
+
 services:
-  # Имя и описание первого контейнера; имя выбирает разработчик.   # Это   контейнер БД
   db:
-    # Из какого образа запустить контейнер:
     image: postgres:13.10
-    # Файл (или список файлов) с переменными окружения
     env_file: .env
-    # Какой volume подключить для этого контейнера
     volumes:
       - pg_data:/var/lib/postgresql/data
 
-# Имя и описание контейнера с бэкендом
   backend:
-    # Из какого Dockerfile собирать образ для этого контейнера:
     build: ./backend/
     env_file: .env
     volumes:
       - static:/backend_static
-    # Какие контейнеры нужно запустить до старта этого контейнера:
     depends_on:
       - db
-  # Имя третьего контейнера. Это контейнер с фронтендом
   frontend:
     env_file: .env
     build: ./frontend/
@@ -38,19 +27,11 @@ services:
     volumes:
       - static:/frontend_static
 
-# Добавляем новый контейнер: gateway.
+
   gateway:
-    # Сбилдить и запустить образ,
-    # описанный в Dockerfile в папке gateway
-    #build: ./gateway/ тут неожиданно в 15-2-10 гейтвей изменился на нджинкс..хз почему
     build: ./nginx/
-    #если не зараюотает - удалить. строчка неожиданно появилась в 15-2-10
     env_file: .env
-    # тут в 15-2-10 неожиданно изчез слеш в конце статикфайлс????
     volumes:
       - static:/staticfiles
-    # Ключ ports устанавливает
-    # перенаправление всех запросов с порта 8000 хоста
-    # на порт 80 контейнера.
     ports:
       - 8000:80
